@@ -1,0 +1,26 @@
+[
+  {
+    "ID": 1776061363618,
+    "Date": "2026-04-13",
+    "Description": "Lunch",
+    "Amount": 20
+  },
+  {
+    "ID": 1776068222792,
+    "Date": "2026-04-13",
+    "Description": "Apple",
+    "Amount": 47
+  },
+  {
+    "ID": 1776068369602,
+    "Date": "2026-04-13",
+    "Description": "Mango",
+    "Amount": 50
+  },
+  {
+    "ID": 1776081226584,
+    "Date": "2026-04-13",
+    "Description": "Dinner",
+    "Amount": 100
+  }
+]

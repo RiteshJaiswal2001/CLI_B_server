@@ -1,206 +1,156 @@
-// console.log("Expanse Tracker.");
-/*
-Application should run from the command line and should have the following features:
-
-Users can add an expense with a description and amount.
-
-Users can update an expense.
-
-Users can delete an expense.
-
-Users can view all expenses.
-
-Users can view a summary of all expenses.
-
-Users can view a summary of expenses for a specific month (of current year).
-
-Here are some additional features that you can add to the application:
-
-Add expense categories and allow users to filter expenses by category.
-
-Allow users to set a budget for each month and show a warning when the user exceeds the budget.
-
-Allow users to export expenses to a CSV file.
-
-The list of commands and their expected output is shown below:
-
-bash
-
-$ expense-tracker add --description "Lunch" --amount 20
-# Expense added successfully (ID: 1)
-$ expense-tracker add --description "Dinner" --amount 10
-# Expense added successfully (ID: 2)
-$ expense-tracker list
-# ID  Date       Description  Amount
-# 1   2024-08-06  Lunch        $20
-# 2   2024-08-06  Dinner       $10
-$ expense-tracker summary
-# Total expenses: $30
-$ expense-tracker delete --id 2
-# Expense deleted successfully
-$ expense-tracker summary
-# Total expenses: $20
-$ expense-tracker summary --month 8
-# Total expenses for August: $20
-
-*/
 const fs = require("fs");
-const fileData = require('./expense.txt')
-console.log(typeof(fileData));
-console.log(fileData);
+const args = process.argv.slice(2);
+const FILE_NAME = "expense.json"; // Using .json is better for structured data
+
+const command = args[0];
+const expenses = loadExpenses();
+
+const commands = {
+  add: add_expense,
+  update: update_expense,
+  delete: delete_expense,
+  list: listAll_expense,
+  summary: summaryOf_expense,
+  export_to_csv: export_To_CSV_File,
+};
+
+if (commands[command]) {
+  commands[command](expenses);
+} else {
+  console.log("Unknown command. Use: add, update, delete, list, summary");
+}
+
+// Add expense categories and allow users to filter expenses by category.
+
+// Allow users to set a budget for each month and show a warning when the user exceeds the budget.
 
 
+function loadExpenses() {
+  if (!fs.existsSync(FILE_NAME)) return [];
+  const data = fs.readFileSync(FILE_NAME, "utf8");
+  // console.log(data);
 
-// let expanse_list
-fs.readFile("expense.txt", (err, data) => {
-  if (err) {
-    return console.error(err);
+  return data ? JSON.parse(data) : [];
+}
+
+// Helper to save data
+function saveExpenses(expenses) {
+  fs.writeFileSync(FILE_NAME, JSON.stringify(expenses, null, 2));
+}
+
+function add_expense(expense_list) {
+  // expense-tracker add --description "Lunch" --amount 20
+  const descIdx = args.indexOf("--description");
+  const amtIdx = args.indexOf("--amount");
+
+  if (descIdx === -1 || amtIdx === -1) {
+    console.log("Error: Please provide --description and --amount");
+    return;
   }
-  const expanse_list = data ? data.toString() : [];
-  console.log(expanse_list);
-  
-  console.log(typeof(expanse_list));
 
-  const args = process.argv.slice(2);
-  const expense_category = {
-    add: add_expanse,
-    update: update_expense,
-    delete: delete_expanse,
-    list: listAll_expanse,
-    summary: summaryOf_expanse,
+  const description = args[descIdx + 1];
+  const amount = parseFloat(args[amtIdx + 1]);
+
+  const newExpense = {
+    ID: Date.now(), // Added ()
+    Date: new Date().toISOString().split("T")[0],
+    Description: description,
+    Amount: amount,
   };
 
-  expense_category[args[0]]();
-//   console.log(expense_category[args[0]]);
-  
+  expense_list.push(newExpense);
+  saveExpenses(expense_list);
+  console.log(`Expense added successfully (ID: ${newExpense.ID})`);
+}
 
-
-  function add_expanse() {
-    // expense-tracker add --description "Lunch" --amount 20
-    const description = args[2];
-    const amount = args[4];
-
-    if (!description || !amount) {
-      console.log("please provide the description and amount to add expense.");
-      return;
-    }
-    const date = new Date();
-
-    const expanse = {
-      "ID": Date.now,
-      "Date": date,
-      "Description": description,
-      "Amount": amount,
-    };
-    // console.log(typeof(expanse_list));
-    
-    // expanse_list.push(expanse);
-    // console.log(`Expense added successfully (ID: ${expanse.ID})`);
+function update_expense(expense_list) {
+  // Expected: update --id 1 --description "New"
+  const idIdx = args.indexOf("--id");
+  if (idIdx === -1) {
+    console.log("Error: --id is required to update.");
+    return;
   }
 
-  function update_expense() {
-    const id = args[2];
-    if (!id) {
-      console.log("Expanse id is required to update expense.");
-      return;
-    }
-    let description = "";
-    let amount = -1;
-    if (args.length == 7) {
-      if (args[3].slice(2) == description) {
-        description = args[4];
-        amount = args[6];
-      } else {
-        description = args[6];
-        amount = args[4];
-      }
-    }
-    if (args[3].slice(2) == description && args.length == 5) {
-      description = args[4];
-    }
+  const id = parseInt(args[idIdx + 1]);
+  const expense = expense_list.find((item) => item.ID === id);
 
-    if (args[3].slice(2) == amount && args.length == 5) {
-      amount = args[4];
-    }
-
-    const expense = expanse_list.find((item) => {
-      return (item.ID = id);
-    });
-
-    if (!expense) {
-      console.log("Expense with this id is not existed.Please enter valid id.");
-      return;
-    }
-    expanse_list.forEach((index, item, arr) => {
-      if (item.ID == id) {
-        item.Description = description != "" ? description : item.Description;
-        item.Amount = amount != -1 ? amount : item.Amount;
-        arr[index] = item;
-        console.log(`Expense updated successfully (expense: ${arr[index]})`);
-      }
-    });
-
-    // const date = new Date()
-
-    // const expanse = {
-    //     "ID":1,
-    //     "Date":date,
-    //     "Description":description,
-    //     "Amount":amount
-    // }
-
-    // expanse_list.push(expanse)
+  if (!expense) {
+    console.log("Error: Expense ID not found.");
+    return;
   }
 
-  function delete_expanse() {
-    const id = args[2];
-    if (!id) {
-      console.log("Expanse id is required to delete  expense.");
-      return;
-    }
-    const filtered_Expense = expanse_list.filter((item) => {
-      return item.ID != id;
-    });
+  const descIdx = args.indexOf("--description");
+  const amtIdx = args.indexOf("--amount");
 
-    if (expanse_list.length == filtered_Expense.length) {
-      console.log("Expense with this id is not existed.Please enter valid id.");
-      return;
-    }
+  if (descIdx !== -1) expense.Description = args[descIdx + 1];
+  if (amtIdx !== -1) expense.Amount = parseFloat(args[amtIdx + 1]);
 
-    expanse_list = filtered_Expense;
+  saveExpenses(expense_list);
+  console.log(`Expense ${id} updated successfully.`);
+}
+
+function delete_expense(expense_list) {
+  const idIdx = args.indexOf("--id");
+  const id = parseInt(args[idIdx + 1]);
+
+  const initialLength = expense_list.length;
+  const filtered = expense_list.filter((item) => item.ID !== id);
+
+  if (filtered.length === initialLength) {
+    console.log("Error: ID not found.");
+    return;
   }
 
-  function listAll_expanse() {
-    console.log("# ID  Date          Description  Amount");
+  saveExpenses(filtered);
+  console.log("Expense deleted successfully.");
+}
 
-    expanse_list.forEach((item) => {
-      console.log(
-        `${item.ID}  ${item.Date}  ${item.Description}  $${item.Amount}`,
-      );
+function listAll_expense(expense_list) {
+  console.log("ID          Date        Description          Amount");
+  expense_list.forEach((item) => {
+    console.log(
+      `${item.ID}  ${item.Date}  ${item.Description.padEnd(20)} $${item.Amount}`,
+    );
+  });
+}
+
+function summaryOf_expense(expense_list) {
+  // Check if a specific month is requested: summary --month 8
+  const monthIdx = args.indexOf("--month");
+  let list = expense_list;
+
+  if (monthIdx !== -1) {
+    const month = parseInt(args[monthIdx + 1]);
+    list = expense_list.filter((item) => {
+      const itemMonth = new Date(item.Date).getMonth() + 1;
+      return itemMonth === month;
     });
+    console.log(`Summary for month ${month}:`);
   }
 
-  function summaryOf_expanse() {
-    let sum = 0;
-    expanse_list.forEach((item) => {
-      sum += item.Amount;
-    });
+  const total = list.reduce((sum, item) => sum + item.Amount, 0);
+  console.log(`Total expenses: $${total}`);
+}
 
-    console.log(`Total expenses: $${sum}`);
+function export_To_CSV_File(expense_list) {
+  if (expense_list.length === 0) {
+    console.log("No expenses to export.");
+    return;
   }
 
-//   fs.writeFile('expense.txt',JSON.stringify(expanse_list, null, 2),(err)=>{
-//     if (err) {
-//         return console.error(err);
-//     }
-//   })
-  
-});
+  const output_File = args[1] || "expenses.csv";
+  csv = expense_list.map((row) => Object.values(row));
+  csv.unshift(Object.keys(expense_list[0]));
+  const csv_data = `"${csv.join('"\n"').replace(/,/g, '","')}"`;
 
-// console.log(expanse_list);
+  console.log(csv_data);
+  console.log(output_File);
 
-// console.log(args[2]);
-// console.log(typeof(args));
-
-const dt = new Date();
-// console.log(dt);
+  // saveExpenses(csv_data,output_File)
+  try {
+    fs.writeFileSync(output_File, csv_data);
+  } catch (error) {
+    console.log("Failed to import csv", error);
+  }
+  console.log(`Expense is succesfully imported to ${output_File} file.`);
+}
