@@ -89,6 +89,6 @@ The app stores data in `expense.json`. Each entry follows this format:
 - **CSV Handling**: The export function safely handles descriptions containing commas by wrapping them in double quotes.
 
 ## Project Link
--https://roadmap.sh/projects/expense-tracker
+https://roadmap.sh/projects/expense-tracker
 ## 📜 License
 This project is open-source and free to use.
