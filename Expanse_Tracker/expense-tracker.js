@@ -20,11 +20,6 @@ if (commands[command]) {
   console.log("Unknown command. Use: add, update, delete, list, summary");
 }
 
-// Add expense categories and allow users to filter expenses by category.
-
-// Allow users to set a budget for each month and show a warning when the user exceeds the budget.
-
-
 function loadExpenses() {
   if (!fs.existsSync(FILE_NAME)) return [];
   const data = fs.readFileSync(FILE_NAME, "utf8");
